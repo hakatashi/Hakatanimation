@@ -2,3 +2,4 @@
 * Windows 32bit
 * Kì
 * –¢Š®¬
+* ƒRƒ“ƒpƒCƒ‹ŠÂ‹« Borland C++ Compiler 5.5
