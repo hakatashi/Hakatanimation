@@ -1,12 +1,8 @@
 #include <windows.h>
 #include <tchar.h>
 
-#define WINDOW_WIDTH 400
-#define WINDOW_HEIGHT 300
-#define WINDOW_X ((GetSystemMetrics( SM_CXSCREEN ) - WINDOW_WIDTH ) / 2)
-#define WINDOW_Y ((GetSystemMetrics( SM_CYSCREEN ) - WINDOW_HEIGHT ) / 2)
 #define TIMER_ID 100
-#define TIMER_ELAPSE 30
+#define TIMER_ELAPSE 3600000
 #define WM_TASKTRAY WM_USER+1
 #define ID_TASKTRAY 0
 #define ID_DUMMY 0
@@ -38,6 +34,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int sho
 			TranslateMessage( &msg );
 			DispatchMessage( &msg );
 		}
+		Sleep(100);
 	}
 
 	KillTimer( hWnd, TIMER_ID );
@@ -55,7 +52,7 @@ HWND Create(HINSTANCE hInst) {
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInst;
-	wc.hIcon = LoadIcon(hInst , TEXT("KITTY"));
+	wc.hIcon = LoadIcon(hInst , TEXT("BOX"));
 	wc.hIconSm = wc.hIcon;
 	wc.hCursor = (HCURSOR)LoadImage(
 		NULL, MAKEINTRESOURCE(IDC_ARROW), IMAGE_CURSOR,
@@ -83,7 +80,7 @@ HWND Create(HINSTANCE hInst) {
 	
 	NOTIFYICONDATA nif;
 	nif.cbSize = sizeof( NOTIFYICONDATA );
-	nif.hIcon = LoadIcon(hInst , TEXT("KITTY"));
+	nif.hIcon = LoadIcon(hInst , TEXT("BOX"));
 	nif.hWnd = g_hWnd;
 	nif.uCallbackMessage = WM_TASKTRAY;
 	nif.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
@@ -101,25 +98,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	DWORD TopRect, LeftRect;
 	static HMENU hMenu, hSubMenu;
 
-	switch( msg ) {
+	switch (msg) {
 	case WM_CREATE:
 		hMenu = LoadMenu( NULL, _T("IDR_POPUP") );
 		hSubMenu = GetSubMenu( hMenu, 0 );
 		return 0;
 	
 	case WM_TIMER:
-		if( wp != TIMER_ID )
-		{
-			break;
+		if ( wp == TIMER_ID ) {
+			
 		}
 		return 0;
 
 	case WM_TASKTRAY:
-		POINT point;
-		GetCursorPos(&point);
-
 		switch (lp) {
 		case WM_RBUTTONDOWN:
+			POINT point;
+			GetCursorPos(&point);
 			SetForegroundWindow(hWnd);
 			TrackPopupMenu( hSubMenu, TPM_LEFTALIGN | TPM_BOTTOMALIGN, point.x, point.y, 0, hWnd, NULL );
 			break;
