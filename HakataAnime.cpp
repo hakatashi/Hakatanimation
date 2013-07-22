@@ -13,6 +13,7 @@
 
 HWND Create(HINSTANCE hInst);
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+void DownExecute();
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int showCmd) {
 	HWND hWnd;
@@ -111,8 +112,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	
 	case WM_TIMER:
 		if ( wp == TIMER_ID ) {
-			CURL *curl;
-			curl = curl_easy_init();
+			DownExecute();
 		}
 		return 0;
 
@@ -130,7 +130,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	case WM_COMMAND:
 		switch( LOWORD(wp) ) {
 		case ID_EXECUTE:
-			system("curl \"http://ch.nicovideo.jp/portal/anime\" > anime.html");
+			DownExecute();
 			break;
 		case ID_EXIT:
 			SendMessage( hWnd, WM_CLOSE, 0, 0 );
@@ -144,4 +144,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	}
 
 	return DefWindowProc( hWnd, msg, wp, lp );
+}
+
+void DownExecute() {
+	CURL *curl;
+	CURLcode res;
+	std::string data;
+	
+	curl = curl_easy_init();
+	
+	if (curl) {
+		
+		curl_easy_setopt(curl, CURLOPT_URL, "http://ch.nicovideo.jp/portal/anime");
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (std::string*)&data);
+		
+		res = curl_easy_perform(curl); //‚È‚º‚©“®‚©‚È‚¢
+		
+		if (res != CURLE_OK) fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+		
+		curl_easy_cleanup(curl);
+		
+	}
+	
+	printf( "%s", data.c_str() );
+	
+	return;
 }
