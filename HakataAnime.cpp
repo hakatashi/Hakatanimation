@@ -1,12 +1,14 @@
 #include <windows.h>
 #include <tchar.h>
+#include "curl/curl.h"
 
 #define TIMER_ID 100
 #define TIMER_ELAPSE 3600000
 #define WM_TASKTRAY WM_USER+1
 #define ID_TASKTRAY 0
 #define ID_DUMMY 0
-#define ID_EXIT 1
+#define ID_EXECUTE 1
+#define ID_EXIT 2
 
 HWND Create(HINSTANCE hInst);
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -55,7 +57,7 @@ HWND Create(HINSTANCE hInst) {
 	wc.hIcon = LoadIcon(hInst , TEXT("BOX"));
 	wc.hIconSm = wc.hIcon;
 	wc.hCursor = (HCURSOR)LoadImage(
-		NULL, MAKEINTRESOURCE(IDC_ARROW), IMAGE_CURSOR,
+		NULL, IDC_ARROW, IMAGE_CURSOR,
 		0, 0, LR_DEFAULTSIZE | LR_SHARED
 	);
 	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
@@ -87,7 +89,9 @@ HWND Create(HINSTANCE hInst) {
 	nif.uID = ID_TASKTRAY;
 	strcpy( nif.szTip, _T("博多アニメーション") );
 
-    Shell_NotifyIcon( NIM_ADD, &nif );
+	Shell_NotifyIcon( NIM_ADD, &nif );
+	
+	FreeConsole();
 	
 	return g_hWnd;
 }
@@ -106,7 +110,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	
 	case WM_TIMER:
 		if ( wp == TIMER_ID ) {
-			
 		}
 		return 0;
 
@@ -123,6 +126,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 
 	case WM_COMMAND:
 		switch( LOWORD(wp) ) {
+		case ID_EXECUTE:
+			system("curl \"http://ch.nicovideo.jp/portal/anime\" > anime.html");
+			break;
 		case ID_EXIT:
 			SendMessage( hWnd, WM_CLOSE, 0, 0 );
 			break;

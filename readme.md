@@ -2,7 +2,19 @@
 * Windows 32bit
 * Kì
 * –¢Š®¬
-* ƒRƒ“ƒpƒCƒ‹ŠÂ‹« Borland C++ Compiler 5.5
+
+# Compile
+
+## Borland C++ Compiler
+
+    bcc32 -tW HakataAnime.cpp
+    brc32 Resource.RES HakataAnime.exe
+
+## GNU Compiler Collection (MinGW)
+
+    windres Resource.RES myres.o
+    g++ -c HakataAnime.cpp -o app.o
+    g++ myres.o app.o -o HakataAnime.exe -lgdi32
 
 # Licenses
 
