@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <tchar.h>
-#include "curl/curl.h"
+#include <regex>
+#include <curl/curl.h>
 
 #define TIMER_ID 100
 #define TIMER_ELAPSE 3600000
@@ -110,6 +111,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	
 	case WM_TIMER:
 		if ( wp == TIMER_ID ) {
+			CURL *curl;
+			curl = curl_easy_init();
 		}
 		return 0;
 
