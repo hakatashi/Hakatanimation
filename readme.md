@@ -1,11 +1,11 @@
-* ƒjƒRƒjƒRƒ`ƒƒƒ“ƒlƒ‹‚ÌƒAƒjƒ‚ðŽ©“®‚Åƒ_ƒEƒ“ƒ[ƒh‚·‚éí’“ƒvƒƒOƒ‰ƒ€
+* ï¿½jï¿½Rï¿½jï¿½Rï¿½`ï¿½ï¿½ï¿½ï¿½ï¿½lï¿½ï¿½ï¿½ÌƒAï¿½jï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Åƒ_ï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½hï¿½ï¿½ï¿½ï¿½ï¿½í’“ï¿½vï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½
 * Windows 32bit
-* Kì
-* –¢Š®¬
+* ï¿½Kï¿½ï¿½
+* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 # Compile
 
-## Borland C++ Compiler (discarded)
+## <del>Borland C++ Compiler</del>
 
     bcc32 -tW HakataAnime.cpp
     brc32 Resource.RES HakataAnime.exe
