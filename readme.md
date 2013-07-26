@@ -5,7 +5,7 @@
 
 # Compile
 
-## Borland C++ Compiler (discarded)
+## <del>Borland C++ Compiler</del>
 
     bcc32 -tW HakataAnime.cpp
     brc32 Resource.RES HakataAnime.exe
