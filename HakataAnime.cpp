@@ -1,6 +1,9 @@
 #include <windows.h>
 #include <tchar.h>
 #include <regex>
+#include <iostream>
+#include <fstream>
+
 #include <curl/curl.h>
 
 #define TIMER_ID 100
@@ -14,6 +17,7 @@
 HWND Create(HINSTANCE hInst);
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 void DownExecute();
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int showCmd) {
 	HWND hWnd;
@@ -150,15 +154,17 @@ void DownExecute() {
 	CURL *curl;
 	CURLcode res;
 	std::string data;
+	//std::ofstream ofs("temp.txt");
 	
 	curl = curl_easy_init();
 	
 	if (curl) {
 		
 		curl_easy_setopt(curl, CURLOPT_URL, "http://ch.nicovideo.jp/portal/anime");
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (std::string*)&data);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
 		
-		res = curl_easy_perform(curl); //‚È‚º‚©“®‚©‚È‚¢
+		res = curl_easy_perform(curl);
 		
 		if (res != CURLE_OK) fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 		
@@ -166,7 +172,12 @@ void DownExecute() {
 		
 	}
 	
-	printf( "%s", data.c_str() );
+	//ofs << data << std::endl;
 	
 	return;
+}
+
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+	((std::string*)userp)->append((char*)contents, size * nmemb);
+	return size * nmemb;
 }
