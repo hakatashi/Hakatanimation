@@ -3,7 +3,7 @@
 * 習作
 * 未完成
 
-# Compile
+# Compile (my sake)
 
 ## <del>Borland C++ Compiler</del>
 
