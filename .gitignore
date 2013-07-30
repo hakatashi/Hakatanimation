@@ -5,5 +5,6 @@
 *.~RES
 *.o
 *.html
-temp.txt
+*.txt
 temp.cpp
+HakataAnime.cfg

@@ -5,7 +5,7 @@
 #include <string>
 
 #include <curl/curl.h>
-#include "boost/regex.hpp"
+#include <boost/regex.hpp>
 
 #define TIMER_ID 100
 #define TIMER_ELAPSE 3600000
@@ -158,7 +158,10 @@ void DownExecute() {
 	
 	std::ofstream ofs("temp.txt");
 	
-	boost::regex reg_exp("<li\\s+id=\"video_\\d+_(\\d+)\"\\s+class=\"video cfix \">");
+	boost::regex reg_exp("<li\\s+id=\"video_\\d+_(\\d+)\"\\s+class=\"video cfix( | selected)\">");
+	boost::smatch result;
+	
+	std::string::const_iterator start, end;
 	
 	std::vector<int> video_id;
 	
@@ -178,7 +181,13 @@ void DownExecute() {
 		
 	}
 	
-	ofs << data << std::endl;
+	start=data.begin();
+	end=data.end();
+	
+	while (regex_search(start, end, result, reg_exp)) {
+		ofs << result.str(1) << std::endl;
+		start = result[0].second;
+	}
 	
 	return;
 }
@@ -187,3 +196,4 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 	((std::string*)userp)->append((char*)contents, size * nmemb);
 	return size * nmemb;
 }
+
