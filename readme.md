@@ -4,7 +4,6 @@
 * 未完成
 
 # Requirements
-
 * libcurl
 * boost.regex
 
