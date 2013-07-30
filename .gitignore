@@ -6,5 +6,7 @@
 *.o
 *.html
 *.txt
+*.index
+video
+Config.ini
 temp.cpp
-HakataAnime.cfg

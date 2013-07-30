@@ -20,6 +20,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 void DownExecute();
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
 void GetIDs(std::vector<int> *video_id);
+int InitLoad();
+
+std::set<int> video_index;
+std::string username;
+std::string password;
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int showCmd) {
 	HWND hWnd;
@@ -28,6 +33,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int sho
 	hWnd = Create( hInst );
 	if( hWnd == NULL ) {
 		MessageBox( NULL, _T("ウィンドウの作成に失敗しました"), _T("エラー"), MB_OK );
+		return 1;
+	}
+	
+	if ( InitLoad() != 0 ) {
 		return 1;
 	}
 
@@ -49,6 +58,57 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int sho
 
 	KillTimer( hWnd, TIMER_ID );
 
+	return 0;
+}
+
+int InitLoad() {
+	std::string temp;
+	int id_temp;
+	
+	boost::regex user_reg("username=(.+)");
+	boost::regex pass_reg("password=(.+)");
+	
+	boost::smatch result;
+	
+	std::ifstream ifs( "video.index" );
+	
+	if ( !ifs ) {
+		MessageBox( NULL, _T("video.indexの読み込みに失敗しました"), _T("エラー"), MB_OK );
+		return 1;
+	}
+	
+	while ( !ifs.eof() ) {
+		ifs >> temp;
+		id_temp = atoi( temp.c_str() );
+		if ( id_temp != 0 ) video_index.insert( atoi( temp.c_str() ) );
+	}
+	
+	std::ifstream cfg_ifs( "Config.ini" );
+	
+	if ( !cfg_ifs ) {
+		MessageBox( NULL, _T("Config.iniの読み込みに失敗しました"), _T("エラー"), MB_OK );
+		return 1;
+	}
+	
+	while ( !cfg_ifs.eof() ) {
+		cfg_ifs >> temp;
+		if (boost::regex_match(temp, result, user_reg)) {
+			username.assign( result.str(1) );
+		} else if (boost::regex_match(temp, result, pass_reg)) {
+			password.assign( result.str(1) );
+		}
+	}
+	
+	if ( username.size()==0 ) {
+		MessageBox( NULL, _T("usernameが設定されていません"), _T("エラー"), MB_OK );
+		return 1;
+	}
+	
+	if ( password.size()==0 ) {
+		MessageBox( NULL, _T("passwordが設定されていません"), _T("エラー"), MB_OK );
+		return 1;
+	}
+	
 	return 0;
 }
 
@@ -201,4 +261,3 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 	((std::string*)userp)->append((char*)contents, size * nmemb);
 	return size * nmemb;
 }
-
