@@ -462,7 +462,7 @@ for video_url_cmdl in cmdl_args:
 			prefix = title_string_norm(video_title)
 		else:
 			prefix = title_string_touch(video_title)
-		video_filename = '%s-%s%s' % (prefix, video_url_id, video_extension)
+		video_filename = 'video\%s-%s%s' % (prefix, video_url_id, video_extension)
 		video_filename = video_filename.decode('utf-8').encode('shift_jis')
 	
 	# Check name

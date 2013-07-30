@@ -1,7 +1,9 @@
 #include <windows.h>
 #include <tchar.h>
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
+#include <ostream>
 #include <string>
 
 #include <curl/curl.h>
@@ -20,6 +22,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 void DownExecute();
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
 void GetIDs(std::vector<int> *video_id);
+void GetVideo(std::vector<int> *video_id);
 int InitLoad();
 
 std::set<int> video_index;
@@ -139,7 +142,7 @@ HWND Create(HINSTANCE hInst) {
 	g_hWnd = CreateWindowEx(
 		WS_EX_TOOLWINDOW,
 		wc.lpszClassName,
-		_T("Sample Program"),
+		_T("Dummy Window"),
 		WS_OVERLAPPEDWINDOW,
 		0, 0, 0, 0,
 		NULL,
@@ -249,10 +252,37 @@ void GetIDs(std::vector<int> *video_id) {
 	return;
 }
 
+void GetVideo(std::vector<int> *video_id) {
+	
+	std::ofstream video_index_ofs( "video.index", std::ios::app );
+	
+	for ( std::vector<int>::iterator it = (*video_id).begin() ; it != (*video_id).end() ; ++it ) {
+		
+		if ( video_index.find( *it ) == video_index.end() ) {
+			
+			std::ostringstream command, errormsg;
+			
+			command << "python nicovideo-dl.py --username=" << username << " --password=" << password << " --title http://www.nicovideo.jp/watch/" << *it;
+			
+			system( command.str().c_str() );
+			
+			video_index_ofs << *it << std::endl;
+			
+			video_index.insert( *it );
+			
+		}
+		
+	}
+	
+	return;
+}
+
 void DownExecute() {
 	std::vector<int> video_id;
 	
 	GetIDs( &video_id );
+	
+	GetVideo( &video_id );
 	
 	return;
 }
