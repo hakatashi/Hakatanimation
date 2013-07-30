@@ -1,10 +1,11 @@
 #include <windows.h>
 #include <tchar.h>
-#include <regex>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #include <curl/curl.h>
+#include "boost/regex.hpp"
 
 #define TIMER_ID 100
 #define TIMER_ELAPSE 3600000
@@ -154,7 +155,12 @@ void DownExecute() {
 	CURL *curl;
 	CURLcode res;
 	std::string data;
-	//std::ofstream ofs("temp.txt");
+	
+	std::ofstream ofs("temp.txt");
+	
+	boost::regex reg_exp("<li\\s+id=\"video_\\d+_(\\d+)\"\\s+class=\"video cfix \">");
+	
+	std::vector<int> video_id;
 	
 	curl = curl_easy_init();
 	
@@ -172,7 +178,7 @@ void DownExecute() {
 		
 	}
 	
-	//ofs << data << std::endl;
+	ofs << data << std::endl;
 	
 	return;
 }
