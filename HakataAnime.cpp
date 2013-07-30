@@ -19,6 +19,7 @@ HWND Create(HINSTANCE hInst);
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 void DownExecute();
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
+void GetIDs(std::vector<int> *video_id);
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int showCmd) {
 	HWND hWnd;
@@ -151,19 +152,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
 	return DefWindowProc( hWnd, msg, wp, lp );
 }
 
-void DownExecute() {
+void GetIDs(std::vector<int> *video_id) {
 	CURL *curl;
 	CURLcode res;
 	std::string data;
-	
-	std::ofstream ofs("temp.txt");
 	
 	boost::regex reg_exp("<li\\s+id=\"video_\\d+_(\\d+)\"\\s+class=\"video cfix( | selected)\">");
 	boost::smatch result;
 	
 	std::string::const_iterator start, end;
-	
-	std::vector<int> video_id;
 	
 	curl = curl_easy_init();
 	
@@ -185,9 +182,17 @@ void DownExecute() {
 	end=data.end();
 	
 	while (regex_search(start, end, result, reg_exp)) {
-		ofs << result.str(1) << std::endl;
+		(*video_id).push_back( atoi( result.str(1).c_str() ) );
 		start = result[0].second;
 	}
+	
+	return;
+}
+
+void DownExecute() {
+	std::vector<int> video_id;
+	
+	GetIDs( &video_id );
 	
 	return;
 }
