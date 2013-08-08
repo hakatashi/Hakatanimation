@@ -16,6 +16,7 @@
 #define ID_DUMMY 0
 #define ID_EXECUTE 1
 #define ID_EXIT 2
+#define ID_RESTRUCTURE 3
 
 HWND Create(HINSTANCE hInst);
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -24,10 +25,13 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 void GetIDs(std::vector<int> *video_id);
 void GetVideo(std::vector<int> *video_id);
 int InitLoad();
+void RestructureIndex();
 
 std::set<int> video_index;
 std::string username;
 std::string password;
+
+NOTIFYICONDATA nid;
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int showCmd) {
 	HWND hWnd;
@@ -62,6 +66,58 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR pCmdLine, int sho
 	KillTimer( hWnd, TIMER_ID );
 
 	return 0;
+}
+	
+LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
+	HDC hDC;
+	PAINTSTRUCT ps;
+	DWORD TopRect, LeftRect;
+	static HMENU hMenu, hSubMenu;
+
+	switch (msg) {
+	case WM_CREATE:
+		hMenu = LoadMenu( NULL, _T("IDR_POPUP") );
+		hSubMenu = GetSubMenu( hMenu, 0 );
+		return 0;
+	
+	case WM_TIMER:
+		if ( wp == TIMER_ID ) {
+			DownExecute();
+		}
+		return 0;
+
+	case WM_TASKTRAY:
+		switch (lp) {
+		case WM_RBUTTONDOWN:
+			POINT point;
+			GetCursorPos(&point);
+			SetForegroundWindow(hWnd);
+			TrackPopupMenu( hSubMenu, TPM_LEFTALIGN | TPM_BOTTOMALIGN, point.x, point.y, 0, hWnd, NULL );
+			break;
+		}
+		return 0;
+
+	case WM_COMMAND:
+		switch( LOWORD(wp) ) {
+		case ID_EXECUTE:
+			DownExecute();
+			break;
+		case ID_RESTRUCTURE:
+			RestructureIndex();
+			break;
+		case ID_EXIT:
+			SendMessage( hWnd, WM_CLOSE, 0, 0 );
+			break;
+		}
+		return 0;
+
+	case WM_DESTROY:
+		Shell_NotifyIcon(NIM_DELETE, &nid);
+		PostQuitMessage( 0 );
+		return 0;
+	}
+
+	return DefWindowProc( hWnd, msg, wp, lp );
 }
 
 int InitLoad() {
@@ -151,68 +207,19 @@ HWND Create(HINSTANCE hInst) {
 		NULL
 	);
 	
-	NOTIFYICONDATA nif;
-	nif.cbSize = sizeof( NOTIFYICONDATA );
-	nif.hIcon = LoadIcon(hInst , TEXT("BOX"));
-	nif.hWnd = g_hWnd;
-	nif.uCallbackMessage = WM_TASKTRAY;
-	nif.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-	nif.uID = ID_TASKTRAY;
-	strcpy( nif.szTip, _T("博多アニメーション") );
+	nid.cbSize = sizeof( NOTIFYICONDATA );
+	nid.hIcon = LoadIcon(hInst , TEXT("BOX"));
+	nid.hWnd = g_hWnd;
+	nid.uCallbackMessage = WM_TASKTRAY;
+	nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+	nid.uID = ID_TASKTRAY;
+	snprintf( nid.szTip, sizeof(nid.szTip), _T("博多アニメーション") );
 
-	Shell_NotifyIcon( NIM_ADD, &nif );
+	Shell_NotifyIcon( NIM_ADD, &nid );
 	
 	FreeConsole();
 	
 	return g_hWnd;
-}
-	
-LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
-	HDC hDC;
-	PAINTSTRUCT ps;
-	DWORD TopRect, LeftRect;
-	static HMENU hMenu, hSubMenu;
-
-	switch (msg) {
-	case WM_CREATE:
-		hMenu = LoadMenu( NULL, _T("IDR_POPUP") );
-		hSubMenu = GetSubMenu( hMenu, 0 );
-		return 0;
-	
-	case WM_TIMER:
-		if ( wp == TIMER_ID ) {
-			DownExecute();
-		}
-		return 0;
-
-	case WM_TASKTRAY:
-		switch (lp) {
-		case WM_RBUTTONDOWN:
-			POINT point;
-			GetCursorPos(&point);
-			SetForegroundWindow(hWnd);
-			TrackPopupMenu( hSubMenu, TPM_LEFTALIGN | TPM_BOTTOMALIGN, point.x, point.y, 0, hWnd, NULL );
-			break;
-		}
-		return 0;
-
-	case WM_COMMAND:
-		switch( LOWORD(wp) ) {
-		case ID_EXECUTE:
-			DownExecute();
-			break;
-		case ID_EXIT:
-			SendMessage( hWnd, WM_CLOSE, 0, 0 );
-			break;
-		}
-		return 0;
-
-	case WM_DESTROY:
-		PostQuitMessage( 0 );
-		return 0;
-	}
-
-	return DefWindowProc( hWnd, msg, wp, lp );
 }
 
 void GetIDs(std::vector<int> *video_id) {
@@ -252,6 +259,11 @@ void GetIDs(std::vector<int> *video_id) {
 	return;
 }
 
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+	((std::string*)userp)->append((char*)contents, size * nmemb);
+	return size * nmemb;
+}
+
 void GetVideo(std::vector<int> *video_id) {
 	
 	std::ofstream video_index_ofs( "video.index", std::ios::app );
@@ -261,6 +273,9 @@ void GetVideo(std::vector<int> *video_id) {
 		if ( video_index.find( *it ) == video_index.end() ) {
 			
 			std::ostringstream command, errormsg;
+			
+			snprintf( nid.szTip, sizeof(nid.szTip), "http://www.nicovideo.jp/watch/%d をダウンロードしています...", *it );
+			Shell_NotifyIcon( NIM_MODIFY, &nid );
 			
 			command << "python nicovideo-dl.py --username=" << username << " --password=" << password << " --title http://www.nicovideo.jp/watch/" << *it;
 			
@@ -273,6 +288,9 @@ void GetVideo(std::vector<int> *video_id) {
 		}
 		
 	}
+	
+	snprintf( nid.szTip, sizeof(nid.szTip), "博多アニメーション" );
+	Shell_NotifyIcon( NIM_MODIFY, &nid );
 	
 	return;
 }
@@ -287,7 +305,48 @@ void DownExecute() {
 	return;
 }
 
-static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
-	((std::string*)userp)->append((char*)contents, size * nmemb);
-	return size * nmemb;
+void RestructureIndex() {
+	WIN32_FIND_DATA finddata;
+	HANDLE hSearch;
+	std::vector<std::string> filelist;
+	boost::regex reg(".+-([0-9]+).(flv|mp4)");
+	boost::smatch result;
+	
+	snprintf( nid.szTip, sizeof(nid.szTip), "インデックスを再構築しています..." );
+	Shell_NotifyIcon( NIM_MODIFY, &nid );
+	
+	hSearch = FindFirstFile( _T("video\\*.*"), &finddata );
+	if( hSearch == INVALID_HANDLE_VALUE ) {
+		MessageBox( NULL, _T("videoディレクトリの探索が開始出来ませんでした"), _T("エラー"), MB_OK );
+		return;
+	}
+	filelist.push_back( finddata.cFileName );
+	
+	while ( FindNextFile( hSearch, &finddata ) ) {
+		filelist.push_back( finddata.cFileName );
+	}
+	
+	if( GetLastError() != ERROR_NO_MORE_FILES ) {
+		MessageBox( NULL, _T("videoディレクトリの探索中にエラーが発生しました"), _T("エラー"), MB_OK );
+		return;
+	}
+	
+	FindClose( hSearch );
+	
+	video_index.clear();
+	for ( std::vector<std::string>::iterator it = filelist.begin() ; it != filelist.end() ; ++it ) {
+		if ( boost::regex_match(*it, result,  reg) ) {
+			video_index.insert( atoi( result.str(1).c_str() ) );
+		}
+	}
+	
+	std::ofstream ofs( "video.index" );
+	for ( std::set<int>::iterator it = video_index.begin() ; it != video_index.end() ; ++it ) {
+		ofs << *it << std::endl;
+	}
+	
+	snprintf( nid.szTip, sizeof(nid.szTip), "博多アニメーション" );
+	Shell_NotifyIcon( NIM_MODIFY, &nid );
+	
+	return;
 }
