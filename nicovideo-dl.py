@@ -463,7 +463,7 @@ for video_url_cmdl in cmdl_args:
 		else:
 			prefix = title_string_touch(video_title)
 		video_filename = 'video\%s-%s%s' % (prefix, video_url_id, video_extension)
-		video_filename = video_filename.decode('utf-8').encode('shift_jis')
+		video_filename = video_filename.decode('utf-8').encode('shift_jis', 'ignore')
 	
 	# Check name
 	if not video_filename.lower().endswith(video_extension):
@@ -480,7 +480,7 @@ for video_url_cmdl in cmdl_args:
 		cond_print('done.\n')
 		cond_print('Video data found at %s\n' % video_data.geturl())
 		
-		video_title = video_title.decode('utf-8').encode('shift_jis')
+		video_title = video_title.decode('utf-8').encode('shift_jis', 'ignore')
 		
 		if cmdl_opts.get_title:
 			print video_title
