@@ -8,5 +8,7 @@
 *.txt
 *.index
 video
+Release
+Release.zip
 Config.ini
 temp.cpp
