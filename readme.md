@@ -19,8 +19,8 @@
     g++ -c Hakatanimation.cpp -o app.o -std=c++11 -I"%BOOST_ROOT%"
     g++ myres.o app.o -o Hakatanimation.exe -L"%BOOST_ROOT%\stage\lib" -lgdi32 -lcurl -lcurldll -lboost_regex-mgw47-mt-s-1_54
 
-* Environmental variable %BOOST_ROOT% have to be set to your boost root directory.
-* The argument -lboost_regex-mgw47-mt-s-1_54 have to be adjusted to your own MinGW and boost library versions.
+* Environmental variable <code>%BOOST_ROOT%</code> have to be set to your boost root directory.
+* The argument <code>-lboost_regex-mgw47-mt-s-1_54</code> have to be adjusted to your own MinGW and boost library versions.
 
 # Licensed BY
 
