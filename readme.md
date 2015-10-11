@@ -1,3 +1,5 @@
+# This project is abandoned and no more maintained. Please take a look at [node-hakatanimation](https://github.com/hakatashi/node-hakatanimation).
+
 * ニコニコチャンネルのアニメを自動でダウンロードする常駐プログラム
 * Windows 32bit
 * 習作
